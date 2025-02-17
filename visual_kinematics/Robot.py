@@ -1,4 +1,4 @@
-from visual_kinematics.Frame import *
+from Frame import *
 from numpy import pi
 from abc import abstractmethod
 import matplotlib.pyplot as plt
@@ -15,14 +15,15 @@ class Robot(object):
                  ws_lim=None, ws_division=5):
         self.params = params
         self.initial_offset = initial_offset
-        self.axis_values = np.zeros(initial_offset.shape, dtype=np.float64)
+        # self.axis_values = np.zeros(initial_offset.shape, dtype=np.float64)
+        self.axis_values = initial_offset
         # is_reachable_inverse must be set everytime when inverse kinematics is performed
         self.is_reachable_inverse = True
         # plot related
         self.plot_xlim = plot_xlim
         self.plot_ylim = plot_ylim
         self.plot_zlim = plot_zlim
-        self.figure = plt.figure()
+        self.figure = plt.figure(1)
         self.ax = self.figure.add_subplot(111, projection="3d")
         # workspace related
         if ws_lim is None:
