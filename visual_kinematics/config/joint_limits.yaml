@@ -1,0 +1,21 @@
+# Limits adopter from UR5e
+
+joints_limits:
+  joint1:
+    min_angle: -6.2831853
+    max_angle: 6.2831853
+  joint2:
+    min_angle: -6.2831853
+    max_angle: 6.2831853
+  joint3:
+    min_angle: -3.14159265
+    max_angle: 3.14159265
+  joint4:
+    min_angle: -6.2831853
+    max_angle: 6.2831853
+  joint5:
+    min_angle: -6.2831853
+    max_angle: 6.2831853
+  joint6:
+    min_angle: -6.2831853
+    max_angle: 6.2831853

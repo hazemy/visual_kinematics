@@ -3,6 +3,7 @@ import numpy as np
 from Robot import *
 from utility import simplify_angles
 import logging
+import yaml
 
 
 class RobotSerial(Robot):
@@ -34,6 +35,13 @@ class RobotSerial(Robot):
         self.step_size = step_size
         self.max_iter = max_iter
         self.final_loss = final_loss
+        self.joints_limits = self.load_config()
+        
+    def load_config(self):
+        with open('./config/joint_limits.yaml', 'r') as file:
+            joints_limits = yaml.safe_load(file)
+        print(joints_limits)
+        return joints_limits
 
     @property
     def dh_params(self):
