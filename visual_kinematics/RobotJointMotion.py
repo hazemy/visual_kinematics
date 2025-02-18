@@ -3,26 +3,27 @@ from RobotSerial import RobotSerial
 from math import pi
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider, Button
-
+from loguru import logger
 
 
 class RobotJointControl():
     def __init__(self, robot, max_interpolation_steps):
         self.robot = robot
+        self.goal_joint_angles = np.zeros((1, len(robot.axis_values)))
         self.max_interpolation_steps = max_interpolation_steps
+        # self.check_limits()
     
-    def compute_interpolation(self, goal_joint_angles):
+    def compute_interpolation(self):
         print("Calculating interpolation values")
         current_joint_angles = self.robot.axis_values
         print(f"Current Joint angles are: {current_joint_angles}")
-        print(f"Goal Joint angles are: {goal_joint_angles}")
-        joint_angles_error = np.subtract(goal_joint_angles, current_joint_angles)
+        print(f"Goal Joint angles are: {self.goal_joint_angles}")
+        joint_angles_error = np.subtract(self.goal_joint_angles, current_joint_angles)
         print(f"Joint angle error: {joint_angles_error}")
         interpolation_step_per_joint = np.divide(joint_angles_error, self.max_interpolation_steps)
         print(f"interpolation_step_per_joint: {interpolation_step_per_joint}")
         interpolated_joint_angles = np.zeros((self.max_interpolation_steps, len(current_joint_angles)))
         print(interpolated_joint_angles.shape)
-        
         increments_per_joint = current_joint_angles
         for interpolation_step in range(self.max_interpolation_steps):
             for axis_idx in range(len(current_joint_angles)):
@@ -69,13 +70,24 @@ class RobotJointControl():
         ax_join4 = fig.add_axes([0.15, 0.6, 0.75, 0.02])
         ax_join5 = fig.add_axes([0.15, 0.7, 0.75, 0.02])
         ax_join6 = fig.add_axes([0.15, 0.8, 0.75, 0.02])
-        joint1_slider = Slider(ax_join1, "Joint 1", 0., 1., valinit=0.5)
-        joint2_slider = Slider(ax_join2, "Joint 2", 0., 1., valinit=0.5)
-        joint3_slider = Slider(ax_join3, "Joint 3", 0., 1., valinit=0.5)
-        joint4_slider = Slider(ax_join4, "Joint 4", 0., 1., valinit=0.5)
-        joint5_slider = Slider(ax_join5, "Joint 5", 0., 1., valinit=0.5)
-        joint6_slider = Slider(ax_join6, "Joint 6", 0., 1., valinit=0.5)
+        joint1_slider = Slider(ax_join1, "Joint 1", -7.0, 7.0, valinit=0.0)
+        joint2_slider = Slider(ax_join2, "Joint 2", -7.0, 7.0, valinit=0.0)
+        joint3_slider = Slider(ax_join3, "Joint 3", -4.0, 4.0, valinit=0.0)
+        joint4_slider = Slider(ax_join4, "Joint 4", -7.0, 7.0, valinit=0.0)
+        joint5_slider = Slider(ax_join5, "Joint 5", -7.0, 7.0, valinit=0.0)
+        joint6_slider = Slider(ax_join6, "Joint 6", -7.0, 7.0, valinit=0.0)
+                
+        # Sliders' callback
         def update(val):
+            self.goal_joint_angles = np.array([
+                joint1_slider.val, 
+                joint2_slider.val, 
+                joint3_slider.val,
+                joint4_slider.val,
+                joint5_slider.val,
+                joint6_slider.val
+                ])
+            print(f"Joint angles: {self.goal_joint_angles}")
             fig.canvas.draw_idle()
         joint1_slider.on_changed(update)
         joint2_slider.on_changed(update)
@@ -100,7 +112,19 @@ class RobotJointControl():
             joint5_slider.reset()
             joint6_slider.reset()
         reset_button.on_clicked(reset_button_on_clicked)
-
+        
+        # Set goal to initial sliders' values
+        self.goal_joint_angles = np.array([
+            joint1_slider.valinit,
+            joint2_slider.valinit,
+            joint3_slider.valinit,
+            joint4_slider.valinit,
+            joint5_slider.valinit,
+            joint6_slider.valinit,
+            ])
+        self.robot.forward(self.goal_joint_angles)
+        self.robot.show()
+        
         plt.show()
 
         
