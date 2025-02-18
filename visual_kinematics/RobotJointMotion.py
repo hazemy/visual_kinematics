@@ -32,14 +32,26 @@ class RobotJointControl():
         return interpolated_joint_angles.round(5)
     
     def check_limits(self):
-        pass
-    
-    def execute_motion(self, goal_joint_angles, visualize):
+        print("Checking Joints limits")
+        joints_limits = self.robot.joints_limits["joints_limits"]
+        print(joints_limits)
+        for (idx, goal_angle) in enumerate(self.goal_joint_angles):
+            joint_entry_limits = joints_limits["joint"+str(idx+1)]
+            print(joint_entry_limits)
+            print(goal_angle)
+            if goal_angle < joint_entry_limits["min_angle"] or goal_angle > joint_entry_limits["max_angle"]:
+                logger.error(f"Goal joint value exceeds limits for {"joint"+str(idx+1)} - Aborting execution!")
+                return False
+        logger.success("Goal joints values are within joints limits")
+        return True
+            
+    def execute_motion(self, visualize):
         print("Executing motion")
-        # self.check_limits()
-        interp_angles = self.compute_interpolation(goal_joint_angles)
-        if visualize:
-            self.visualize_motion(interp_angles)
+        res = self.check_limits()
+        if res:
+            interp_angles = self.compute_interpolation()
+            if visualize:
+                self.visualize_motion(interp_angles)
 
     def visualize_motion(self, interp_angles, time_step=0.1):
         plt.ion()
@@ -71,22 +83,12 @@ class RobotJointControl():
         joint4_slider.on_changed(update)
         joint5_slider.on_changed(update)
         joint6_slider.on_changed(update)
-        # joint_angles = np.array([joint1_slider.val, 
-        #         joint2_slider.val, 
-        #         joint3_slider.val,
-        #         joint4_slider.val,
-        #         joint5_slider.val,
-        #         joint6_slider.val
-        #         ])
-        # print(f"Joint angles: {joint_angles}")
-
-        ax_execution = fig.add_axes([0.6, 0.025, 0.1, 0.04])
+        ax_execution = fig.add_axes([0.65, 0.025, 0.1, 0.04])
         execution_button = Button(ax_execution, 'Execute', color='lightblue', hovercolor='0.975')
         def execution_button_on_clicked(mouse_event):
             print("Execution button clicked")
-            self.execute_motion(joint_angles, visualize=True)
+            self.execute_motion(visualize=True)
         execution_button.on_clicked(execution_button_on_clicked)
-        
         ax_reset = fig.add_axes([0.8, 0.025, 0.1, 0.04])
         reset_button = Button(ax_reset, 'Reset', color='red', hovercolor='0.975')
         def reset_button_on_clicked(mouse_event):
