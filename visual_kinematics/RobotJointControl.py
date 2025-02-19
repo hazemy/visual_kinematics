@@ -11,9 +11,15 @@ class RobotJointControl():
         self.robot = robot
         self.goal_joint_angles = np.zeros((1, len(robot.axis_values)))
         self.max_interpolation_steps = max_interpolation_steps
-        # self.check_limits()
     
     def compute_interpolation(self):
+        """Computes linear interpolation of goal angles (assuming fixed steps).
+
+        Returns:
+            array: returns a 2-dimensional array of size (N x S) where N is the number of joints
+                    and S is the number of interpolation steps. The array comprises the
+                    interpolation steps per joint.
+        """
         print("Calculating interpolation values")
         current_joint_angles = self.robot.axis_values
         print(f"Current Joint angles are: {current_joint_angles}")
@@ -33,6 +39,11 @@ class RobotJointControl():
         return interpolated_joint_angles.round(5)
     
     def check_limits(self):
+        """Check joint limits according to those defined in the config.
+        
+        Returns:
+            boolean: False if limits are exceeded, True otherwise.
+        """
         print("Checking Joints limits")
         joints_limits = self.robot.joints_limits["joints_limits"]
         print(joints_limits)
@@ -41,12 +52,15 @@ class RobotJointControl():
             print(joint_entry_limits)
             print(goal_angle)
             if goal_angle < joint_entry_limits["min_angle"] or goal_angle > joint_entry_limits["max_angle"]:
-                logger.error(f"Goal joint value exceeds limits for {"joint"+str(idx+1)} - Aborting execution!")
+                logger.error(f"Goal joint value exceeds limits for {'joint'+str(idx+1)} - Aborting execution!")
                 return False
         logger.success("Goal joints values are within joints limits")
         return True
             
     def execute_motion(self, visualize):
+        """
+        Performs athe computation of the motion and its visualization.
+        """
         print("Executing motion")
         res = self.check_limits()
         if res:
@@ -124,7 +138,6 @@ class RobotJointControl():
             ])
         self.robot.forward(self.goal_joint_angles)
         self.robot.show()
-        
         plt.show()
 
         
@@ -141,6 +154,5 @@ if __name__ == "__main__":
     goal_joint_angles = np.array([0.5 * pi,0.25 * pi, -0.25 * pi, -0.25 * pi, 0.5 * pi, 0.25 * pi])
     robot_control = RobotJointControl(robot, max_interpolation_steps=15)
     robot_control.get_user_input()
-    # robot_control.execute_motion(goal_joint_angles, visualize=True)
 
         
